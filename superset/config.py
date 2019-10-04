@@ -301,7 +301,10 @@ DRUID_DATA_SOURCE_BLACKLIST = []
 DEFAULT_MODULE_DS_MAP = OrderedDict([
     ('superset.connectors.sqla.models', ['SqlaTable']),
     ('superset.connectors.druid.models', ['DruidDatasource']),
+    ('superset.connectors.graphql.models', ['GraphQLDatasource']),
 ])
+
+
 ADDITIONAL_MODULE_DS_MAP = {}
 ADDITIONAL_MIDDLEWARE = []
 

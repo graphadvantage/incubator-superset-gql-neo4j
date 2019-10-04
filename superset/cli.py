@@ -223,11 +223,32 @@ def load_examples(load_test_data):
 @click.option('--merge', '-m', is_flag=True, default=False,
               help='Specify using \'merge\' property during operation. '
                    'Default value is False.')
+
 def refresh_druid(datasource, merge):
     """Refresh druid datasources"""
     session = db.session()
     from superset.connectors.druid.models import DruidCluster
     for cluster in session.query(DruidCluster).all():
+        try:
+            cluster.refresh_datasources(datasource_name=datasource,
+                                        merge_flag=merge)
+        except Exception as e:
+            print(
+                "Error while processing cluster '{}'\n{}".format(
+                    cluster, str(e)))
+            logging.exception(e)
+        cluster.metadata_last_refreshed = datetime.now()
+        print(
+            'Refreshed metadata from cluster '
+            '[' + cluster.cluster_name + ']')
+    session.commit()
+
+
+def refresh_graphql(datasource, merge):
+    """Refresh druid datasources"""
+    session = db.session()
+    from superset.connectors.graphql.models import GraphQLEndPoint
+    for cluster in session.query(GraphQLEndPoint).all():
         try:
             cluster.refresh_datasources(datasource_name=datasource,
                                         merge_flag=merge)

@@ -72,6 +72,9 @@ class Datasource(BaseSupersetView):
         if datasource_type == 'druid':
             datasource = ConnectorRegistry.get_datasource(
                 datasource_type, datasource_id, db.session)
+        elif datasource_type == 'graphql':
+            datasource = ConnectorRegistry.get_datasource(
+                datasource_type, datasource_id, db.session)
         elif datasource_type == 'table':
             database = (
                 db.session

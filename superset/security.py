@@ -33,6 +33,7 @@ class SupersetSecurityManager(SecurityManager):
         'DatabaseAsync',
         'DatabaseView',
         'DruidClusterModelView',
+        'GraphQLEndPointModelView',
     }
 
     USER_MODEL_VIEWS = {
@@ -50,6 +51,9 @@ class SupersetSecurityManager(SecurityManager):
         'DruidColumnInlineView',
         'DruidDatasourceModelView',
         'DruidMetricInlineView',
+        'GraphQLColumnInlineView',
+        'GraphQLDatasourceModelView',
+        'GraphQLMetricInlineView',
     } | READ_ONLY_MODEL_VIEWS
 
     ADMIN_ONLY_VIEW_MENUS = {
@@ -58,6 +62,7 @@ class SupersetSecurityManager(SecurityManager):
         'SQL Lab',
         'Queries',
         'Refresh Druid Metadata',
+        'Refresh GraphQL Metadata',
         'ResetPasswordView',
         'RoleModelView',
         'Security',
@@ -71,6 +76,7 @@ class SupersetSecurityManager(SecurityManager):
         'can_sql_json',  # TODO: move can_sql_json to sql_lab role
         'can_override_role_permissions',
         'can_sync_druid_source',
+        'can_sync_graphql_source',
         'can_override_role_permissions',
         'can_approve',
         'can_update_role',

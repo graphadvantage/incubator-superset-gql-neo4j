@@ -2247,6 +2247,7 @@ class Superset(BaseSupersetView):
 
     @has_access
     @expose('/sync_druid/', methods=['POST'])
+    @expose('/sync_graphql/', methods=['POST'])
     @log_this
     def sync_druid_source(self):
         """Syncs the druid datasource in main db with the provided config.
@@ -2291,6 +2292,55 @@ class Superset(BaseSupersetView):
             return json_error_response(err_msg)
         try:
             DruidDatasource.sync_to_db_from_config(
+                druid_config, user, cluster)
+        except Exception as e:
+            logging.exception(utils.error_msg_from_exception(e))
+            return json_error_response(utils.error_msg_from_exception(e))
+        return Response(status=201)
+
+    def sync_graphql_source(self):
+        """Syncs the druid datasource in main db with the provided config.
+
+        The endpoint takes 3 arguments:
+            user - user name to perform the operation as
+            cluster - name of the druid cluster
+            config - configuration stored in json that contains:
+                name: druid datasource name
+                dimensions: list of the dimensions, they become druid columns
+                    with the type STRING
+                metrics_spec: list of metrics (dictionary). Metric consists of
+                    2 attributes: type and name. Type can be count,
+                    etc. `count` type is stored internally as longSum
+                    other fields will be ignored.
+
+            Example: {
+                'name': 'test_click',
+                'metrics_spec': [{'type': 'count', 'name': 'count'}],
+                'dimensions': ['affiliate_id', 'campaign', 'first_seen']
+            }
+        """
+        payload = request.get_json(force=True)
+        druid_config = payload['config']
+        user_name = payload['user']
+        cluster_name = payload['cluster']
+
+        user = security_manager.find_user(username=user_name)
+        GraphQLDatasource = ConnectorRegistry.sources['graphql']
+        GraphQLEndPoint = GraphQLDatasource.cluster_class
+        if not user:
+            err_msg = __("Can't find User '%(name)s', please ask your admin "
+                         'to create one.', name=user_name)
+            logging.error(err_msg)
+            return json_error_response(err_msg)
+        cluster = db.session.query(GraphQLEndPoint).filter_by(
+            cluster_name=cluster_name).first()
+        if not cluster:
+            err_msg = __("Can't find DruidCluster with cluster_name = "
+                         "'%(name)s'", name=cluster_name)
+            logging.error(err_msg)
+            return json_error_response(err_msg)
+        try:
+            GraphQLDatasource.sync_to_db_from_config(
                 druid_config, user, cluster)
         except Exception as e:
             logging.exception(utils.error_msg_from_exception(e))
